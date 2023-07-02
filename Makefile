@@ -9,3 +9,9 @@ flake:
 
 test:
 	docker-compose run --rm app sh -c "python manage.py test"
+
+pip-compile:
+	pip-compile -v --no-emit-index-url requirements.in
+
+dev-pip-compile:
+	pip-compile -v --no-emit-index-url requirements-dev.in
