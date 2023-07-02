@@ -4,10 +4,16 @@ build:
 up:
 	docker-compose up
 
+down:
+	docker-compose down --remove-orphans
+
+run:
+	docker-compose run app sh
+
 flake:
 	docker-compose run --rm app sh -c "flake8"
 
-test:
+test: flake
 	docker-compose run --rm app sh -c "python manage.py test"
 
 pip-compile:
