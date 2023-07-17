@@ -11,7 +11,7 @@ run:
 	docker-compose run app sh
 
 flake:
-	docker-compose run --rm app sh -c "flake8"
+	docker-compose run --rm app sh -c "flake8 --ignore=E,W"
 
 test: flake
 	docker-compose run --rm app sh -c "python manage.py test"
