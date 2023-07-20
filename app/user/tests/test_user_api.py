@@ -34,7 +34,7 @@ class PublicUserAPITests(TestCase):
         self.assertTrue(user.check_password(payload["password"]))
         self.assertNotIn("password", res.data)
 
-    def test__create_user_with_email_already_exists__error(self):
+    def test__create_user_with_email_already_exists__returns_400(self):
         payload = {
             "email": EXAMPLE_USER_EMAIL,
             "password": EXAMPLE_USER_PASSWORD,
@@ -73,7 +73,7 @@ class PublicUserAPITests(TestCase):
         self.assertIn("token", res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
-    def test__create_token_for_user_with_invalid_credentials__returns_error(self):
+    def test__create_token_for_user_with_invalid_credentials__returns_400(self):
         user_details = {
             "name": EXAMPLE_USER_NAME,
             "email": EXAMPLE_USER_EMAIL,
@@ -87,7 +87,7 @@ class PublicUserAPITests(TestCase):
         self.assertNotIn("token", res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test__create_token_for_user_with_blank_password__returns_error(self):
+    def test__create_token_for_user_with_blank_password__returns_400(self):
         payload = {"email": EXAMPLE_USER_EMAIL, "password": ""}
 
         res = self.client.post(TOKEN_URL, payload)
