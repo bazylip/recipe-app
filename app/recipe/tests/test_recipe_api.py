@@ -1,45 +1,25 @@
 from decimal import Decimal
 
-from core.models import Recipe, User
-from django.contrib.auth import get_user_model
+from core.models import Recipe
 from django.test import TestCase
 from django.urls import reverse
 from recipe.serializers import RecipeDetailSerializer, RecipeSerializer
 from rest_framework import status
 from rest_framework.test import APIClient
+from utils.factories import (
+    EXAMPLE_LINK,
+    EXAMPLE_PRICE,
+    EXAMPLE_TIME_MINUTES,
+    EXAMPLE_TITLE,
+    recipe_factory,
+    user_factory,
+)
 
 LIST_RECIPES_URL = reverse("recipe:recipe-list")
-
-EXAMPLE_TITLE = "Example recipe name"
-EXAMPLE_TIME_MINUTES = 5
-EXAMPLE_PRICE = Decimal("5.50")
-EXAMPLE_DESCRIPTION = "Example description"
-EXAMPLE_LINK = "http://example.com/recipe.pdf"
-
-USER_EMAIL = "user@example.com"
-USER_PASSWORD = "password123"
 
 
 def detail_url(recipe_id):
     return reverse("recipe:recipe-detail", args=[recipe_id])
-
-
-def recipe_factory(user: User, **kwargs) -> Recipe:
-    defaults = {
-        "title": EXAMPLE_TITLE,
-        "time_minutes": EXAMPLE_TIME_MINUTES,
-        "price": EXAMPLE_PRICE,
-        "description": EXAMPLE_DESCRIPTION,
-        "link": EXAMPLE_LINK,
-    }
-    defaults.update(kwargs)
-
-    recipe = Recipe.objects.create(user=user, **defaults)
-    return recipe
-
-
-def user_factory(**kwargs) -> User:
-    return get_user_model().objects.create_user(**kwargs)
 
 
 class PublicRecipeAPITests(TestCase):
@@ -55,7 +35,7 @@ class PublicRecipeAPITests(TestCase):
 class PrivateRecipeAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = user_factory(email=USER_EMAIL, password=USER_PASSWORD)
+        self.user = user_factory()
         self.client.force_authenticate(self.user)
 
     def test__list_recipes_authenticated__lists_recipes_successfully(self):

@@ -3,9 +3,7 @@ from decimal import Decimal
 from core import models
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-
-EXAMPLE_EMAIL = "test@example.com"
-EXAMPLE_PASSWORD = "testpass123"
+from utils.factories import EXAMPLE_EMAIL, EXAMPLE_PASSWORD, user_factory
 
 EXAMPLE_TITLE = "Example recipe name"
 EXAMPLE_TIME_MINUTES = 5
@@ -15,13 +13,10 @@ EXAMPLE_DESCRIPTION = "Example description"
 
 class ModelTests(TestCase):
     def test__create_user__with_email__sets_email_and_password_correctly(self):
-        email = EXAMPLE_EMAIL
-        password = EXAMPLE_PASSWORD
+        user = user_factory()
 
-        user = get_user_model().objects.create_user(email=email, password=password)
-
-        self.assertEqual(user.email, email)
-        self.assertTrue(user.check_password(password))
+        self.assertEqual(user.email, EXAMPLE_EMAIL)
+        self.assertTrue(user.check_password(EXAMPLE_PASSWORD))
 
     def test__create_user__with_unnormalized_email__sets_normalized_email(self):
         sample_emails = [
@@ -32,14 +27,12 @@ class ModelTests(TestCase):
         ]
 
         for email, expected_email in sample_emails:
-            user = get_user_model().objects.create_user(
-                email=email, password="testpass123"
-            )
+            user = user_factory(email=email, password="testpass123")
             self.assertEqual(user.email, expected_email)
 
     def test__create_user__without_email__raises_error(self):
         with self.assertRaises(ValueError):
-            get_user_model().objects.create_user(email="", password="testpass123")
+            user_factory(email="", password="testpass123")
 
     def test__create_superuser__sets_proper_superuser_fields(self):
         user = get_user_model().objects.create_superuser(
@@ -50,9 +43,7 @@ class ModelTests(TestCase):
         self.assertTrue(user.is_staff)
 
     def test__create_recipe__successful(self):
-        user = get_user_model().objects.create_user(
-            email=EXAMPLE_EMAIL, password=EXAMPLE_PASSWORD
-        )
+        user = user_factory()
         recipe = models.Recipe.objects.create(
             user=user,
             title=EXAMPLE_TITLE,
