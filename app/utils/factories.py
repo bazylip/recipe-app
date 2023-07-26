@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from core.models import Recipe, User
+from core.models import Recipe, Tag, User
 from django.contrib.auth import get_user_model
 
 EXAMPLE_EMAIL = "test@example.com"
@@ -29,3 +29,8 @@ def recipe_factory(user: User, **kwargs) -> Recipe:
 
     recipe = Recipe.objects.create(user=user, **defaults)
     return recipe
+
+
+def tag_factory(user: User, name: str, **kwargs) -> Tag:
+    tag = Tag.objects.create(user=user, name=name, **kwargs)
+    return tag
