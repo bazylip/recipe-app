@@ -3,12 +3,19 @@ from decimal import Decimal
 from core import models
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from utils.factories import EXAMPLE_EMAIL, EXAMPLE_PASSWORD, user_factory
+from utils.factories import (
+    EXAMPLE_EMAIL,
+    EXAMPLE_PASSWORD,
+    ingredient_factory,
+    user_factory,
+)
 
-EXAMPLE_TITLE = "Example recipe name"
-EXAMPLE_TIME_MINUTES = 5
-EXAMPLE_PRICE = Decimal("5.50")
-EXAMPLE_DESCRIPTION = "Example description"
+EXAMPLE_RECIPE_TITLE = "Example recipe name"
+EXAMPLE_RECIPE_TIME_MINUTES = 5
+EXAMPLE_RECIPE_PRICE = Decimal("5.50")
+EXAMPLE_RECIPE_DESCRIPTION = "Example description"
+
+EXAMPLE_INGREDIENT_NAME = "Ingredient 1"
 
 
 class ModelTests(TestCase):
@@ -46,10 +53,10 @@ class ModelTests(TestCase):
         user = user_factory()
         recipe = models.Recipe.objects.create(
             user=user,
-            title=EXAMPLE_TITLE,
-            time_minutes=EXAMPLE_TIME_MINUTES,
-            price=EXAMPLE_PRICE,
-            description=EXAMPLE_DESCRIPTION,
+            title=EXAMPLE_RECIPE_TITLE,
+            time_minutes=EXAMPLE_RECIPE_TIME_MINUTES,
+            price=EXAMPLE_RECIPE_PRICE,
+            description=EXAMPLE_RECIPE_DESCRIPTION,
         )
 
         self.assertEqual(str(recipe), recipe.title)
@@ -59,3 +66,10 @@ class ModelTests(TestCase):
         tag = models.Tag.objects.create(user=user, name="Tag1")
 
         self.assertEqual(str(tag), tag.name)
+
+    def test__create_ingredient_successful(self):
+        user = user_factory()
+
+        ingredient = ingredient_factory(user=user, name=EXAMPLE_INGREDIENT_NAME)
+
+        self.assertEqual(str(ingredient), ingredient.name)
