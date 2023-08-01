@@ -9,6 +9,10 @@ from utils.factories import ingredient_factory, user_factory
 INGREDIENTS_URL = reverse("recipe:ingredient-list")
 
 
+def detail_url(ingredient_id):
+    return reverse("recipe:ingredient-detail", args=[ingredient_id])
+
+
 class PublicIngredientAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -47,3 +51,24 @@ class PrivateIngredientAPITests(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]["name"], ingredient.name)
         self.assertEqual(res.data[0]["id"], ingredient.id)
+
+    def test_update_ingredients(self):
+        ingredient = ingredient_factory(user=self.user, name="Cilantro")
+
+        payload = {"name": "Coriander"}
+        url = detail_url(ingredient.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        ingredient.refresh_from_db()
+        self.assertEqual(ingredient.name, payload["name"])
+
+    def test_delete_ingredient(self):
+        ingredient = ingredient_factory(user=self.user, name="Cilantro")
+
+        url = detail_url(ingredient.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        ingredients = Ingredient.objects.filter(user=self.user)
+        self.assertFalse(ingredients.exists())
