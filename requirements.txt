@@ -23,6 +23,8 @@ inflection==0.5.1
     # via drf-spectacular
 jsonschema==4.17.3
     # via drf-spectacular
+pillow==8.2.0
+    # via -r requirements.in
 psycopg2==2.8.6
     # via -r requirements.in
 pyrsistent==0.19.3
