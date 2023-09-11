@@ -4,7 +4,7 @@ from django.urls import reverse
 from recipe.serializers import IngredientSerializer
 from rest_framework import status
 from rest_framework.test import APIClient
-from utils.factories import ingredient_factory, user_factory
+from utils.factories import ingredient_factory, recipe_factory, user_factory
 
 INGREDIENTS_URL = reverse("recipe:ingredient-list")
 
@@ -72,3 +72,28 @@ class PrivateIngredientAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         ingredients = Ingredient.objects.filter(user=self.user)
         self.assertFalse(ingredients.exists())
+
+    def test_filter_ingredients_assigned_to_recipes(self):
+        ing1 = ingredient_factory(user=self.user, name="Apple")
+        ing2 = ingredient_factory(user=self.user, name="Turkey")
+        recipe = recipe_factory(user=self.user)
+        recipe.ingredients.add(ing1)
+
+        res = self.client.get(INGREDIENTS_URL, {"assigned_only": 1})
+
+        s1 = IngredientSerializer(ing1)
+        s2 = IngredientSerializer(ing2)
+        self.assertIn(s1.data, res.data)
+        self.assertNotIn(s2.data, res.data)
+
+    def test_filtered_ingredients_unique(self):
+        ing = ingredient_factory(user=self.user, name="Apple")
+        ingredient_factory(user=self.user, name="Turkey")
+        r1 = recipe_factory(user=self.user)
+        r2 = recipe_factory(user=self.user)
+        r1.ingredients.add(ing)
+        r2.ingredients.add(ing)
+
+        res = self.client.get(INGREDIENTS_URL, {"assigned_only": 1})
+
+        self.assertEqual(len(res.data), 1)

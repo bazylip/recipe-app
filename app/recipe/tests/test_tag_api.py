@@ -4,7 +4,7 @@ from django.urls import reverse
 from recipe.serializers import TagSerializer
 from rest_framework import status
 from rest_framework.test import APIClient
-from utils.factories import tag_factory, user_factory
+from utils.factories import recipe_factory, tag_factory, user_factory
 
 TAGS_URL = reverse("recipe:tag-list")
 
@@ -72,3 +72,28 @@ class PrivateTagAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         tags = Tag.objects.filter(user=self.user)
         self.assertFalse(tags.exists())
+
+    def test_filter_ingredients_assigned_to_recipes(self):
+        tag1 = tag_factory(user=self.user, name="Breakfast")
+        tag2 = tag_factory(user=self.user, name="Lunch")
+        recipe = recipe_factory(user=self.user)
+        recipe.tags.add(tag1)
+
+        res = self.client.get(TAGS_URL, {"assigned_only": 1})
+
+        s1 = TagSerializer(tag1)
+        s2 = TagSerializer(tag2)
+        self.assertIn(s1.data, res.data)
+        self.assertNotIn(s2.data, res.data)
+
+    def test_filtered_ingredients_unique(self):
+        tag = tag_factory(user=self.user, name="Breakfast")
+        tag_factory(user=self.user, name="Lunch")
+        r1 = recipe_factory(user=self.user)
+        r2 = recipe_factory(user=self.user)
+        r1.tags.add(tag)
+        r2.tags.add(tag)
+
+        res = self.client.get(TAGS_URL, {"assigned_only": 1})
+
+        self.assertEqual(len(res.data), 1)
